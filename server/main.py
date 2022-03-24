@@ -15,3 +15,7 @@ while True:
     connectionSock, address = controlSocket.accept()
     msg = connectionSock.recv(1024).decode()
     print("from client: ", address, " message: ", msg)
+    response = input('Response to the client :')
+    connectionSock.send(response.encode())
+    connectionSock.close()
+
