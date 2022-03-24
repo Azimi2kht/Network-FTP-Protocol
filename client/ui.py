@@ -2,7 +2,6 @@ class UI:
     help_width = 20
 
     def __init__(self):
-        self.current_command = "help"
         self.help()
         self.get_command()
 
@@ -17,4 +16,6 @@ class UI:
         print(f'{"QUIT":<{self.help_width}}: Exit\n')
 
     def get_command(self):
-        self.current_command = input("Enter a command: ")
+        command = input("Enter a command: ")
+        if command.lower() == 'help':
+            self.help()
