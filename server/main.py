@@ -20,9 +20,9 @@ while True:
     # log
     print("from client: ", address, " message: ", message)
 
-    # check if the message is valid
-    response = commands.respond_to_message(message)
-    
+    # check message validity
+    response = commands.respond(message)
+
     # respond
     connectionSock.send(response.encode())
     connectionSock.close()
