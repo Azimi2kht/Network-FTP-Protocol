@@ -3,6 +3,7 @@ from random import randint
 
 PORT_LOWER_BOUND = 3000
 PORT_UPPER_BOUND = 50000
+COMMAND_DELIMITER = '&'
 
 
 def respond(message):
@@ -18,7 +19,7 @@ def respond(message):
 
 def list_files():
     listing = os.listdir(os.getcwd())
-    listing_string = convert_list_to_str('&', listing)
+    listing_string = convert_list_to_str(COMMAND_DELIMITER, listing)
     return listing_string
 
 
