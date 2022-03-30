@@ -27,5 +27,5 @@ class FtpClient:
 
     def receive_from_control(self):
         message = self.control_connection.receive()
-        #print('From Control Channel: ', message)
+        # print('From Control Channel: ', message)
         return message

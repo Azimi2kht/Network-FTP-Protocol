@@ -2,16 +2,17 @@ from TcpServer import *
 from random import randint
 import os
 
+
 class FtpServer:
     def __init__(self, host_name: str, server_port: int):
         self.host_name = host_name
         self.server_port = server_port
         self.control_connection = TcpServer(self.host_name, self.server_port)
         self.data_connection = None
-        self.client_connection=(self.control_connection).get_clientconnection()
-    
+        self.client_connection = self.control_connection.get_client_connection()
+
     def send_with_control(self, message: str):
-        #random_port = randint(3000, 50000)
+        # random_port = randint(3000, 50000)
         self.control_connection.send(message)
 
     # what type is the data here?
@@ -20,65 +21,63 @@ class FtpServer:
         self.data_connection = TcpServer(self.host_name, port)
         client_connection, message = self.data_connection.receive()
         client_connection.send(data.encode())
-  
+
     def receive_from_control(self):
         print("waiting for instruction")
-        message = (self.client_connection).recv(1024).decode()
-        print("received instruction: ",message)
+        message = self.client_connection.recv(1024).decode()
+        print("received instruction: ", message)
         self.answer_commands(message)
-       
-        
-    def answer_commands(self, msg:str):
-        #if(msg=="quit"):
-         # self.quit()
-        if(msg=="list"):
 
-          self.list_files()
+    def answer_commands(self, msg: str):
+        # if(msg=="quit"):
+        # self.quit()
+        if msg == "list":
 
-        elif(msg=="pwd") :
+            self.list_files()
 
-          self.Show_Current_Directory()
+        elif msg == "pwd":
 
-        elif("cd"  in msg) :
-          
-          self.change_Current_Directory(msg[3:])
+            self.show_current_directory()
 
-    def Show_Current_Directory(self):
+        elif "cd" in msg:
+
+            self.change_current_directory(msg[3:])
+
+    def show_current_directory(self):
         path = os.getcwd()
-        (self.client_connection).send(path.encode())
-           
-    def change_Current_Directory(self,msg:str):
+        self.client_connection.send(path.encode())
+
+    def change_current_directory(self, msg: str):
         print("cur dir set to:")
         os.chdir(msg)
-        
-        (self.client_connection).send(os.getcwd().encode())
+
+        self.client_connection.send(os.getcwd().encode())
         print(os.getcwd())
         print("new dir sent to client")
 
     def list_files(self):
-          path = os.getcwd()
-          dir_list = os.listdir(path)
-          number_of_files=len(dir_list)
-          
-          (self.client_connection).send(str(number_of_files).encode())
-          print("Files and directories in '", path, "' :")
-    
-        # print the list
-          totalsize=0
-          for item in dir_list:
-            if(os.path.isdir(item)):
-              
+        path = os.getcwd()
+        dir_list = os.listdir(path)
+        number_of_files = len(dir_list)
 
-              pm=">   name: "+item+" size: "+str(os.path.getsize(item))+"b"
-            else:  
-              pm="name: "+item+" size: "+str(os.path.getsize(item))+"b"
+        self.client_connection.send(str(number_of_files).encode())
+        print("Files and directories in '", path, "' :")
+
+        # print the list
+        totalsize = 0
+        for item in dir_list:
+            if os.path.isdir(item):
+
+                pm = ">   name: " + item + " size: " + str(os.path.getsize(item)) + "b"
+            else:
+                pm = "name: " + item + " size: " + str(os.path.getsize(item)) + "b"
             print(pm)
             self.client_connection.send(pm.encode())
-            totalsize+=os.path.getsize(item)
-        
-          
-          self.client_connection.send(str(totalsize).encode())
-    '''''
+            totalsize += os.path.getsize(item)
+
+        self.client_connection.send(str(totalsize).encode())
+
+    '''
     def get_dir_size(self,path):
                total = 0
                with os.scandir(path) as it:
@@ -87,4 +86,5 @@ class FtpServer:
                         total += entry.stat().st_size
                     elif entry.is_dir():
                        total += self.get_dir_size(entry.path)
-                    return total'''
+                    return total    
+    '''

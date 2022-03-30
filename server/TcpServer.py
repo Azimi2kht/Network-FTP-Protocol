@@ -9,16 +9,16 @@ class TcpServer:
         print("I'm listening ...")
         self.client_connection, self.client_address = self.sock.accept()
         print("connected to by address: ( ", self.client_address, " )")
-    def get_clientconnection(self):
-        
-        return (self.client_connection)
- 
+
+    def get_client_connection(self):
+        return self.client_connection
+
     def receive(self):
-        cl=self.get_clientconnection()
-        
-        message = (self.client_connection).recv(1024).decode()#
+        cl = self.get_client_connection()
+
+        message = self.client_connection.recv(1024).decode()  #
         print(message)
-        return message    
+        return message
 
     def send(self, message: str):
         self.sock.send(message.encode())
