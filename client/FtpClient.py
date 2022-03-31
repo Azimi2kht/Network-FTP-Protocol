@@ -11,21 +11,22 @@ class FtpClient:
     def send_with_control(self, message: str):
         self.control_connection.send(message)
 
+    def send_with_data(self, message: str):
+        self.data_connection.send(message)
+
     # where should the close function be? [2]
     # this function may be unnecessary.
     # the port received from server should be given here.
-    def receive_from_data(self, port: int):
-        # this snippet is to make a connection between client and server data_connection.
-        message = "I am ready."
-        self.data_connection = TcpClient(self.host_name, port)
-        self.data_connection.send(message)
-
-        # receive the main data
+    def receive_from_data(self, data_port: int):
+        # creating connection.
+        self.data_connection = TcpClient(self.host_name, data_port)
+        # receive the main data.
         data = self.data_connection.receive()
-        print('From Data Channel: ', data)
+
+        self.control_connection.close()
+
         return data
 
     def receive_from_control(self):
         message = self.control_connection.receive()
-        # print('From Control Channel: ', message)
         return message

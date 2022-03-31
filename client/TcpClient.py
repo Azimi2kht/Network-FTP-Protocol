@@ -1,5 +1,7 @@
 from socket import *
 
+BUFFER_SIZE = 1024
+
 
 class TcpClient:
     def __init__(self, host_name: str, server_port: int):
@@ -10,6 +12,8 @@ class TcpClient:
         self.sock.send(message.encode())
 
     def receive(self):
-        response = self.sock.recv(1024).decode()#ino avaz kardi
+        response = self.sock.recv(BUFFER_SIZE).decode()
         return response
-    # where to put the close function?!
+
+    def close(self):
+        self.sock.close()
