@@ -31,8 +31,19 @@ class FtpServer:
         client_connection.send(data.encode())
 
     def receive_from_control(self):
+
         print("waiting for instruction\n")
-        message = self.control_connection.recv(BUFFER_SIZE).decode()  # problem here.
+        message = self.connection.connection.recv(BUFFER_SIZE).decode()  # problem here.
+
+        # client disconnecting.
+        if message == "":
+            print("client: ", self.connection.client_address, "has disconnected.\n")
+            print("accepting connections ...")
+            self.connection.connection, self.connection.client_address = self.connection.sock.accept()
+            print("connected to by address:`", self.connection.client_address)
+            message = self.connection.connection.recv(BUFFER_SIZE).decode()
+            print("client said:", message)
+
         print("received instruction: ", message, "\n")
         return message
 
@@ -50,13 +61,13 @@ class FtpServer:
 
     def show_current_directory(self):
         path = os.getcwd()
-        self.control_connection.send(path.encode())
+        self.connection.connection.send(path.encode())
 
     def change_current_directory(self, path: str):
         print("cur dir set to:")
         os.chdir(path)
 
-        self.control_connection.send(os.getcwd().encode())
+        self.connection.connection.send(os.getcwd().encode())
         print(os.getcwd())
         print("new dir sent to client")
 
@@ -65,7 +76,7 @@ class FtpServer:
         dir_list = os.listdir(path)
         number_of_files = len(dir_list)
 
-        self.control_connection.send(str(number_of_files).encode())
+        self.connection.connection.send(str(number_of_files).encode())
         print("Files and directories in '", path, "' :")
 
         # print the list
@@ -75,22 +86,21 @@ class FtpServer:
                 pm = ">   name: " + item + " size: " + str(os.path.getsize(item)) + "b"
             else:
                 pm = "name: " + item + " size: " + str(os.path.getsize(item)) + "b"
-            print(pm)
-            self.control_connection.send(pm.encode())
+            self.connection.connection.send(pm.encode())
             totalsize += os.path.getsize(item)
-        self.control_connection.send(str(totalsize).encode())
+        self.connection.connection.send(str(totalsize).encode())
 
     def download_file(self, request):
         file_name = request[5:]
         # check if the file exists.
         if not os.path.isfile(file_name):
-            self.control_connection.send(FILE_UNAVAILABLE.encode())
+            self.connection.connection.send(FILE_UNAVAILABLE.encode())
             print('there is no such file on the server:', file_name)
             return
         else:
-            self.control_connection.send(FILE_CONFORMATION.encode())
+            self.connection.connection.send(FILE_CONFORMATION.encode())
             data_port = create_random_port()
-            self.control_connection.send(str(data_port).encode())
+            self.connection.connection.send(str(data_port).encode())
 
             # creating the data socket:
             # listen
@@ -102,8 +112,6 @@ class FtpServer:
             f.close()
             # send
             self.data_connection.connection.send(file.encode())
-
-
 
     '''
     def get_dir_size(self,path):
