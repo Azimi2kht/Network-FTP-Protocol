@@ -76,19 +76,27 @@ class FtpServer:
         dir_list = os.listdir(path)
         number_of_files = len(dir_list)
 
-        self.connection.connection.send(str(number_of_files).encode())
         print("Files and directories in '", path, "' :")
-
+       
+        pm ="number of files: "+str(number_of_files)
         # print the list
         totalsize = 0
         for item in dir_list:
             if os.path.isdir(item):
-                pm = ">   name: " + item + " size: " + str(os.path.getsize(item)) + "b"
+                size=0
+                for path, dirs, files in os.walk(item):
+                    for f in files:
+                      fp = os.path.join(item, f)
+                      size += os.path.getsize(fp)
+                pm += "\n"+">   name: " + item + " size: " + str(size) + "b"
+                totalsize += size
             else:
-                pm = "name: " + item + " size: " + str(os.path.getsize(item)) + "b"
-            self.connection.connection.send(pm.encode())
-            totalsize += os.path.getsize(item)
-        self.connection.connection.send(str(totalsize).encode())
+                pm +="\n"+ "name: " + item + " size: " + str(os.path.getsize(item)) + "b"
+                totalsize += os.path.getsize(item)
+        print(pm)
+        
+        pm+="\n"+"total directory size: "+str(totalsize)+"b"
+        self.control_connection.send(pm.encode())
 
     def download_file(self, request):
         file_name = request[5:]
