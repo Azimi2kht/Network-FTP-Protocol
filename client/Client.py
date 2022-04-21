@@ -42,15 +42,8 @@ class Client:
         # request for list
         print("requesting files...")
         self.connection.send_with_control("list")
-
-        number_of_files = self.connection.receive_from_control()
-        print("number of files: ", number_of_files)
-        for i in range(int(number_of_files)):
-            response = self.connection.receive_from_control()
-            print(response)
-
-        totalsize = self.connection.receive_from_control()
-        print("total directory size: ", totalsize, "b")
+        response = self.connection.receive_from_control()
+        print(response)
 
     def show_current_directory(self):
         print("requesting path...")
