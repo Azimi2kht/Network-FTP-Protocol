@@ -40,13 +40,13 @@ class Client:
 
     def list_files(self):
         # request for list
-        print("requesting files...")
+        print("requesting files...\n")
         self.connection.send_with_control("list")
         response = self.connection.receive_from_control()
         print(response)
 
     def show_current_directory(self):
-        print("requesting path...")
+        print("requesting path...\n")
         self.connection.send_with_control("pwd")
         path = self.connection.receive_from_control()
         print(path)
