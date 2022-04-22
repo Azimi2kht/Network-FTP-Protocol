@@ -21,7 +21,14 @@ class FtpClient:
         # creating connection.
         self.data_connection = TcpClient(self.host_name, data_port)
         # receive the main data.
-        data = self.data_connection.receive()
+        data = b""
+        while True:
+            section = self.data_connection.sock.recv(1024)
+            data += section
+
+            if not section:
+                break
+            
 
         self.control_connection.close()
 

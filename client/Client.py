@@ -1,8 +1,11 @@
 from FtpClient import *
+from socket import *
 
 FILE_UNAVAILABLE = '550 Requested action not taken. File unavailable'
 FILE_CONFORMATION = '200 OK'
 
+HOST_NAME = '127.0.0.1'
+PORT_NUMBER = 2121
 
 class Client:
     def __init__(self, host_name: str, server_port: int):
@@ -15,18 +18,18 @@ class Client:
         # self.main_data = self.connection.receive_from_data(int(self.port_message))
 
     def get_command(self):
-        command = input("Enter a command: ").lower()
-        if command == 'help':
+        command = input("\nEnter a command: ")
+        if command.lower() == 'help':
             self.help()
             # elif self.command == 'quit':
         #  quit()
-        elif command == 'list':
+        elif command.lower() == 'list':
             self.list_files()
-        elif command == 'pwd':
+        elif command.lower() == 'pwd':
             self.show_current_directory()
-        elif command[:2] == 'cd':
+        elif command[:2].lower() == 'cd':
             self.change_directory(command)
-        elif command[:4] == 'dwld':
+        elif command[:4].lower() == 'dwld':
             self.download_file(command)
 
     def help(self):
@@ -40,20 +43,22 @@ class Client:
 
     def list_files(self):
         # request for list
-        print("requesting files...\n")
+        print("\nrequesting files...\n")
         self.connection.send_with_control("list")
         response = self.connection.receive_from_control()
         print(response)
+        print()
 
     def show_current_directory(self):
-        print("requesting path...\n")
+        print("\n`requesting path...\n")
         self.connection.send_with_control("pwd")
         path = self.connection.receive_from_control()
         print(path)
 
     def change_directory(self, command: str):
         # the following message doesn't make sense if the given path is invalid.
-        print("changing dir to: ", command[3:])
+        print("\nchanging dir to: ", command[3:])
+        print()
         self.connection.send_with_control(command)
         command = self.connection.receive_from_control()
         print("dir changed to: ", command)
@@ -61,23 +66,47 @@ class Client:
     def download_file(self, command: str):
         file_name = command[5:]
         self.connection.send_with_control(command)
-        response = self.connection.receive_from_control()
-        # check if the file exists.
-        if response == FILE_UNAVAILABLE:
-            print('The requested file does not exist in this directory.')
+
+        data_port = self.connection.receive_from_control() # ok
+
+        if data_port == 'file not found':
+            print(data_port)
         else:
-            print('Downloading the file...')
-            # getting the data port:
-            data_port = int(self.connection.receive_from_control())
-            data = self.connection.receive_from_data(data_port)
+            data_socket = socket(AF_INET, SOCK_STREAM)
+            data_socket.connect((self.host_name, int(data_port)))
+            with open(file_name, 'wb') as file:
+                data = b""
+                while True:
+                    section = data_socket.recv(1024)
+                    data += section
 
-            f = open(file_name, 'w')
-            f.write(data)
-            f.close()
+                    if not section:
+                        break
 
-            print('File downloaded.')
+                file.write(data)
+                file.close()
+                data_socket.close()
+                print("\ndownloaded successfully.\n")
+        # self.connection.send_with_control(command)
+        # response = self.connection.receive_from_control()
+        # # check if the file exists.
+        # if response == FILE_UNAVAILABLE:
+        #     print('\nThe requested file does not exist in this directory.')
+        # else:
+        #     print('\nDownloading the file...')
+        #     # getting the data port:
+        #     data_port = int(self.connection.receive_from_control()) #ok
+        #     data = self.connection.receive_from_data(data_port).decode()
+
+        #     print(data)
+            
+        #     f = open(file_name, 'w')
+        #     f.write(data)
+        #     f.close()
+
+        #     print('\nFile downloaded.')
 
 
-myClient = Client('127.0.0.1', 2121)
+myClient = Client(HOST_NAME, PORT_NUMBER)
 while True:
     myClient.get_command()

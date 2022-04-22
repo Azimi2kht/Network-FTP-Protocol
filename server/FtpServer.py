@@ -7,6 +7,7 @@ FILE_CONFORMATION = '200 OK'
 BUFFER_SIZE = 1024
 
 
+
 def create_random_port():
     random_port = randint(3000, 50000)
     return random_port
@@ -93,33 +94,50 @@ class FtpServer:
             else:
                 pm +="\n"+ "name: " + item + " size: " + str(os.path.getsize(item)) + "b"
                 totalsize += os.path.getsize(item)
-        print(pm)
         
         pm+="\n"+"total directory size: "+str(totalsize)+"b"
         self.connection.connection.send(pm.encode())
 
     def download_file(self, request):
         file_name = request[5:]
-        # check if the file exists.
-        if not os.path.isfile(file_name):
-            self.connection.connection.send(FILE_UNAVAILABLE.encode())
-            print('there is no such file on the server:', file_name)
-            return
-        else:
-            self.connection.connection.send(FILE_CONFORMATION.encode())
+        if file_name in os.listdir():
             data_port = create_random_port()
+            data_socket = socket(AF_INET, SOCK_STREAM)
+            data_socket.bind((self.host_name, data_port))
+            data_socket.listen()
             self.connection.connection.send(str(data_port).encode())
 
-            # creating the data socket:
-            # listen
-            self.data_connection = TcpServer(self.host_name, data_port)
+            data_connection, cAddress = data_socket.accept()
+            with open(file_name,'rb') as file:
+                data_connection.send(file.read())
+                file.close()
+                data_connection.close()
+        else:
+            msg = 'file not found'
+            self.connection.connection.send(msg.encode())
+            
+        # check if the file exists.
+        # if not os.path.isfile(file_name):
+        #     self.connection.connection.send(FILE_UNAVAILABLE.encode())
+        #     print('there is no such file on the server:', file_name)
+        #     return
+        # else:
+        #     self.connection.connection.send(FILE_CONFORMATION.encode())
+        #     data_port = create_random_port()
+        #     self.connection.connection.send(str(data_port).encode())
 
-            # prepare the file:
-            f = open(file_name, 'r')
-            file = f.read()
-            f.close()
-            # send
-            self.data_connection.connection.send(file.encode())
+        #     # creating the data socket:
+        #     # listen
+        #     self.data_connection = TcpServer(self.host_name, data_port)
+
+        #     # prepare the file:
+        #     # f = open(file_name, 'r')
+        #     # file = f.read()
+        #     # f.close()
+        #     with open(filename, 'rb') as file:
+        #         data_connection.sock.send(file.read())
+        #         file.close()
+        #         data_connection.sock.close()
 
     '''
     def get_dir_size(self,path):
