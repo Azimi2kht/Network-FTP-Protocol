@@ -96,7 +96,7 @@ class FtpServer:
         print(pm)
         
         pm+="\n"+"total directory size: "+str(totalsize)+"b"
-        self.control_connection.send(pm.encode())
+        self.connection.connection.send(pm.encode())
 
     def download_file(self, request):
         file_name = request[5:]
