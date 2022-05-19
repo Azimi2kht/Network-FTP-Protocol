@@ -48,9 +48,7 @@ class FtpServer:
         print("received instruction: ", message, "\n")
         return message
 
-    def answer_requests(self, request: str):  # an "else" is needed here
-        # if(msg=="quit"):
-        # self.quit()
+    def answer_requests(self, request: str):
         if request == "list":
             self.list_files()
         elif request == "pwd":
