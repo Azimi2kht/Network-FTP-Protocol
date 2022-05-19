@@ -116,37 +116,3 @@ class FtpServer:
             msg = 'file not found'
             self.connection.connection.send(msg.encode())
             
-        # check if the file exists.
-        # if not os.path.isfile(file_name):
-        #     self.connection.connection.send(FILE_UNAVAILABLE.encode())
-        #     print('there is no such file on the server:', file_name)
-        #     return
-        # else:
-        #     self.connection.connection.send(FILE_CONFORMATION.encode())
-        #     data_port = create_random_port()
-        #     self.connection.connection.send(str(data_port).encode())
-
-        #     # creating the data socket:
-        #     # listen
-        #     self.data_connection = TcpServer(self.host_name, data_port)
-
-        #     # prepare the file:
-        #     # f = open(file_name, 'r')
-        #     # file = f.read()
-        #     # f.close()
-        #     with open(filename, 'rb') as file:
-        #         data_connection.sock.send(file.read())
-        #         file.close()
-        #         data_connection.sock.close()
-
-    '''
-    def get_dir_size(self,path):
-               total = 0
-               with os.scandir(path) as it:
-                  for entry in it:
-                    if entry.is_file():
-                        total += entry.stat().st_size
-                    elif entry.is_dir():
-                       total += self.get_dir_size(entry.path)
-                    return total    
-    '''
